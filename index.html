@@ -899,6 +899,9 @@ async function predict() {
     month           : parseInt(document.getElementById('month').value),
     last_month_sales: parseFloat(document.getElementById('lastSales').value) || 0,
     model           : selMdl,
+    // Keep IDR values for display purposes
+    priceIDR        : priceIDR,
+    freightIDR      : freightIDR,
   };
 
   try {
@@ -1027,8 +1030,8 @@ function renderResult(data, payload, discountPct) {
   document.getElementById('paramsGrid').innerHTML = `
     <div class="param-item"><div class="param-key">Category</div><div class="param-val" style="font-size:.72rem;font-family:var(--sans)">${payload.category.slice(0,18)}</div></div>
     <div class="param-item"><div class="param-key">Month</div><div class="param-val">${MONTHS[payload.month-1]}</div></div>
-    <div class="param-item"><div class="param-key">Avg Price</div><div class="param-val">Rp ${priceIDR.toLocaleString("id-ID")}</div></div>
-    <div class="param-item"><div class="param-key">Avg Freight</div><div class="param-val">Rp ${freightIDR.toLocaleString("id-ID")}</div></div>
+    <div class="param-item"><div class="param-key">Avg Price</div><div class="param-val">Rp ${payload.priceIDR.toLocaleString("id-ID")}</div></div>
+    <div class="param-item"><div class="param-key">Avg Freight</div><div class="param-val">Rp ${payload.freightIDR.toLocaleString("id-ID")}</div></div>
     <div class="param-item"><div class="param-key">Avg Rating</div><div class="param-val">${payload.avg_rating.toFixed(1)} / 5</div></div>
     <div class="param-item"><div class="param-key">Discount</div><div class="param-val">${discountPct}%</div></div>
     <div class="param-item"><div class="param-key">Last Month</div><div class="param-val">${payload.last_month_sales} units</div></div>
@@ -1037,6 +1040,25 @@ function renderResult(data, payload, discountPct) {
 }
 
 init();
+
+// Sync all sliders with their input defaults on page load
+(function syncDefaults() {
+  const pairs = [
+    ['price',    'priceS',    'priceBadge',    v => 'Rp ' + parseInt(v).toLocaleString('id-ID')],
+    ['freight',  'freightS',  'freightBadge',  v => 'Rp ' + parseInt(v).toLocaleString('id-ID')],
+    ['rating',   'ratingS',   'ratingBadge',   v => parseFloat(v).toFixed(1) + ' / 5'],
+    ['discount', 'discountS', 'discountBadge', v => v + '%'],
+  ];
+  pairs.forEach(([inputId, sliderId, badgeId, fmt]) => {
+    const input  = document.getElementById(inputId);
+    const slider = document.getElementById(sliderId);
+    const badge  = document.getElementById(badgeId);
+    if (!input || !slider || !badge) return;
+    slider.value = input.value;
+    badge.textContent = fmt(input.value);
+  });
+  refreshStrip();
+})();
 </script>
 </body>
 </html>

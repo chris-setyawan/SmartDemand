@@ -99,22 +99,22 @@ def predict(req: PredictRequest):
         units      = max(0, round(raw))
         dist       = _rf_tree_distribution(tree_preds)
 
-    # Demand level — category-level scale (hundreds of units)
-    if units < 50:
+    # Demand level — adjusted to actual model prediction range
+    if units < 70:
         level     = "Low Demand"
         level_key = "low"
-    elif units < 200:
+    elif units < 120:
         level     = "Moderate Demand"
         level_key = "moderate"
-    elif units < 500:
+    elif units < 180:
         level     = "High Demand"
         level_key = "high"
     else:
         level     = "Very High Demand"
         level_key = "veryhigh"
 
-    # Score 0-100 based on category-level scale
-    score = min(100, int((units / 1000) * 100))
+    # Score 0-100 based on actual prediction range (max ~300)
+    score = min(100, int((units / 300) * 100))
 
     return {
         "units"             : units,
@@ -129,9 +129,9 @@ def predict(req: PredictRequest):
 
 
 def _classify_unit(u):
-    if u < 50:    return "Low"
-    elif u < 200: return "Moderate"
-    elif u < 500: return "High"
+    if u < 70:    return "Low"
+    elif u < 120: return "Moderate"
+    elif u < 180: return "High"
     else:         return "Very High"
 
 
@@ -144,20 +144,20 @@ def _rf_tree_distribution(tree_preds: np.ndarray) -> dict:
 
 
 def _heuristic_distribution(units: int) -> dict:
-    if units < 50:
+    if units < 70:
         return {"Low": 72, "Moderate": 20, "High": 6, "Very High": 2}
-    elif units < 200:
-        mod = int(40 + (units / 200) * 35)
+    elif units < 120:
+        mod = int(40 + (units / 120) * 35)
         low = max(5, 45 - mod)
         hi  = max(5, 100 - mod - low - 3)
         return {"Low": low, "Moderate": mod, "High": hi, "Very High": 3}
-    elif units < 500:
-        hi  = int(45 + ((units - 200) / 300) * 35)
+    elif units < 180:
+        hi  = int(45 + ((units - 120) / 60) * 35)
         mod = max(8, 50 - hi)
         vhi = max(5, 100 - hi - mod - 5)
         return {"Low": 5, "Moderate": mod, "High": hi, "Very High": vhi}
     else:
-        vhi = min(85, int(50 + (units - 500) / 500 * 30))
+        vhi = min(85, int(50 + (units - 180) / 120 * 30))
         hi  = max(8, 90 - vhi)
         return {"Low": 2, "Moderate": 5, "High": hi, "Very High": vhi}
 
