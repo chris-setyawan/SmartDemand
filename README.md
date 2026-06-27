@@ -31,32 +31,7 @@ Buka browser di http://localhost:8000
 
 ## Deployment
 
-App ini di-deploy ke **Railway**.
-
-1. Push semua file ke GitHub repository (bisa private)
-2. Buka https://railway.app → New Project → Deploy from GitHub repo
-3. Connect repository GitHub
-4. Settings otomatis terdeteksi dari `requirements.txt`, atau set manual:
-   - Build Command: `pip install -r requirements.txt`
-   - Start Command: `uvicorn main:app --host 0.0.0.0 --port $PORT`
-5. Tunggu deploy selesai (3–5 menit)
-6. Klik Settings → Networking → Generate Domain untuk dapat link publik
-
-## Catatan File Model
-
-Download 4 file dari Google Drive folder `SmartDemand_Dataset/models/`:
-
-- random_forest_model.joblib (~50MB)
-- linear_regression_model.joblib
-- label_encoder.joblib
-- config.json
-
-Taruh di folder `models/` sebelum deploy. Untuk GitHub, file >50MB perlu Git LFS:
-```
-git lfs install
-git lfs track "*.joblib"
-git add .gitattributes
-```
+App ini di-deploy ke Railway menggunakan FastAPI dan dapat diakses melalui link di bagian atas dokumen ini. Repository ini sudah include semua file yang dibutuhkan (kode, model, dan konfigurasi) sehingga dapat di-deploy ulang ke platform serupa seperti Railway atau Render jika diperlukan.
 
 ## Model Performance
 
@@ -64,6 +39,18 @@ git add .gitattributes
 |---|---|---|---|
 | Random Forest | 0.9541 | 8.92 | 17.22 |
 | Linear Regression | 0.9445 | 9.45 | 18.26 |
+
+## Notebooks
+
+Repository ini menyertakan dua notebook yang menunjukkan proses iterasi pengembangan model.
+
+**01_Initial_Model_ProductLevel.ipynb**
+
+Pendekatan awal, target prediksi adalah quantity_sold per produk individual per bulan. Hasilnya R² hanya 0.5033 karena data sangat noisy, mayoritas produk hanya terjual 1-5 unit per bulan sehingga sulit diprediksi dari fitur yang tersedia.
+
+**02_Final_Model_CategoryLevel.ipynb**
+
+Setelah evaluasi, granularitas data diubah menjadi per kategori produk per bulan, bukan per produk individual. Pendekatan ini menghasilkan R² 0.9541 karena data jauh lebih smooth dan konsisten. Model ini yang digunakan pada aplikasi yang di-deploy.
 
 ## Tech Stack
 
