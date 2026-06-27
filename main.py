@@ -8,7 +8,7 @@ import os
 
 app = FastAPI(title="Smart-Demand API")
 
-# ── Load model & config ──
+# Load model & config
 rf_model  = joblib.load("models/random_forest_model.joblib")
 lr_model  = joblib.load("models/linear_regression_model.joblib")
 label_enc = joblib.load("models/label_encoder.joblib")
@@ -22,7 +22,7 @@ SEASONALITY_INDEX = {int(k): v for k, v in config["seasonality_index"].items()}
 MODEL_METRICS     = config["model_metrics"]
 
 
-# ── Schemas ──
+# Schemas
 class PredictRequest(BaseModel):
     category: str
     avg_price: float
@@ -41,7 +41,7 @@ class ConfigResponse(BaseModel):
     model_metrics: dict
 
 
-# ── Routes ──
+# Routes
 @app.get("/", response_class=FileResponse)
 def serve_frontend():
     return FileResponse("index.html")
@@ -99,7 +99,7 @@ def predict(req: PredictRequest):
         units      = max(0, round(raw))
         dist       = _rf_tree_distribution(tree_preds)
 
-    # Demand level — adjusted to actual model prediction range
+    # Demand level - adjusted to actual model prediction range
     if units < 70:
         level     = "Low Demand"
         level_key = "low"
